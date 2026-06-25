@@ -1,0 +1,9 @@
+.{
+    .name = .Dashboard,
+    .version = "0.0.1",
+    .dependencies = .{
+    },
+    .minimum_zig_version = "0.16.0",
+    .paths = .{""},
+    .fingerprint = 0xde657d5b959dfe86,
+}
