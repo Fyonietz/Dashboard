@@ -2,7 +2,7 @@ const std = @import("std");
 const c_locale= @cImport(@cInclude("locale.h"));
 const nc = @import("nc.zig").nc;
 const renderer = @import("frontend/renderer.zig");
-
+const Plane = renderer.Plane;
 const App = struct{
     running:bool,
     context:?*nc.notcurses = null,
@@ -24,10 +24,15 @@ const App = struct{
         }
         self.running = false;
     }
+   pub fn render(self:*App) !void{
+         if(self.context) |ctx|{
+            if(nc.notcurses_render(ctx) < 0) return error.ErrorRenderingProcess;
+        }
+   }
 };
-pub inline fn CellChar(c:u8) nc.nccell{
+pub inline fn CellChar(c:u32) nc.nccell{
    return nc.nccell{
-       .gcluster = @as(u32,c),
+       .gcluster = c,
        .stylemask = 0,
        .channels = 0
    };
@@ -38,19 +43,12 @@ pub fn main() !void{
     var app = try App.init(null,null);
     defer app.deinit() catch {};
     //Code block 
-
-    const plane_opt = nc.ncplane_options{
-      .y = 2,
-      .x = 0,
-      .rows = 24,
-      .cols = 80
-    };
-    const plane_uno = nc.ncplane_create(app.plane,&plane_opt);
+    const plane_sec = Plane.create(app.plane,2,2,24,80);
     const cell_upper = CellChar('+');
     const cell_lower = CellChar('+');
-    const cell_hline = CellChar('-');
+    const cell_hline = CellChar('─');
     const cell_vline = CellChar('|');
-    _ = nc.ncplane_box(plane_uno,
+    _ = nc.ncplane_box(plane_sec,
         &cell_upper,
         &cell_upper,
         &cell_lower,
@@ -60,7 +58,17 @@ pub fn main() !void{
         5, 
         20, 
         0);
-    _ = nc.notcurses_render(app.context);
+
+    const hello = renderer.Text{
+        .plane = plane_sec,
+        .x = 1,
+        .y =2,
+        .text = "Hellow"
+    };
+    try hello.draw();
+
+    //Renderer
+    try app.render();
     while(app.running){
 
     }
