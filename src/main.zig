@@ -1,8 +1,13 @@
 const std = @import("std");
 const c_locale= @cImport(@cInclude("locale.h"));
 const nc = @import("nc.zig").nc;
+
 const renderer = @import("frontend/renderer.zig");
 const Plane = renderer.Plane;
+const Text = renderer.Text;
+const Cell = renderer.Cell;
+
+
 const App = struct{
     running:bool,
     context:?*nc.notcurses = null,
@@ -43,11 +48,11 @@ pub fn main() !void{
     var app = try App.init(null,null);
     defer app.deinit() catch {};
     //Code block 
-    const plane_sec = Plane.create(app.plane,2,2,24,80);
-    const cell_upper = CellChar('+');
-    const cell_lower = CellChar('+');
-    const cell_hline = CellChar('─');
-    const cell_vline = CellChar('|');
+    const plane_sec = Plane.create(app.plane,10,2,24,80);
+    const cell_upper = try Cell.init(plane_sec,"─");
+    const cell_lower = try Cell.init(plane_sec,"─");
+    const cell_hline =try Cell.init(plane_sec,"─");
+    const cell_vline =try Cell.init(plane_sec,"│");
     _ = nc.ncplane_box(plane_sec,
         &cell_upper,
         &cell_upper,
@@ -59,7 +64,7 @@ pub fn main() !void{
         20, 
         0);
 
-    const hello = renderer.Text{
+    const hello = Text{
         .plane = plane_sec,
         .x = 1,
         .y =2,
