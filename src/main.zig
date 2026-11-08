@@ -42,7 +42,7 @@ pub inline fn CellChar(c:u32) nc.nccell{
        .channels = 0
    };
 }
-pub fn main() !void{
+pub fn main(io:std.Io) !void{
     //Init Block
     _ = c_locale.setlocale(c_locale.LC_ALL,"");
     var app = try App.init(null,null);
@@ -74,7 +74,12 @@ pub fn main() !void{
 
     //Renderer
     try app.render();
+   const target_fps = io.Duration.fromMilliseconds(16) + io.Duration.fromNanoseconds(666_667);
     while(app.running){
-
+        const start = try io.Clock.awake.now();
+        
+        try app.render();
+        const elapse_in_ns = start.untilNow(io,.awake);
+        const elapse_time = elapse_in_ns.toNanoseconds(); 
     }
 }
